@@ -1,9 +1,9 @@
-import { MESSAGES, MESSAGE_INTERVAL, TOTAL_TRANSITION } from './constants.js';
+import { DEFAULT_MESSAGES, MESSAGE_INTERVAL, TOTAL_TRANSITION } from './constants.js';
 
 export class MessageRotator {
   constructor(board) {
     this.board = board;
-    this.messages = MESSAGES;
+    this.messages = DEFAULT_MESSAGES;
     this.currentIndex = -1;
     this._timer = null;
     this._paused = false;
@@ -38,6 +38,13 @@ export class MessageRotator {
     this.currentIndex = (this.currentIndex - 1 + this.messages.length) % this.messages.length;
     this.board.displayMessage(this.messages[this.currentIndex]);
     this._resetAutoRotation();
+  }
+
+  setMessages(newMessages) {
+    this.stop();
+    this.messages = newMessages;
+    this.currentIndex = -1;
+    this.start();
   }
 
   _resetAutoRotation() {

@@ -1,85 +1,82 @@
-# FlipOff.
+# FlipWeather.
 
-**Turn any TV into a retro split-flap display.** The classic flip-board look, without the $3,500 hardware. And it's free.
+**Live local weather on a retro split-flap display.** Real-time conditions, delivered with old-school style.
 
-![FlipOff Screenshot](screenshot.png)
+Forked from [magnum6actual/flipoff](https://github.com/magnum6actual/flipoff) — the original split-flap display web app.
 
 ## What is this?
 
-FlipOff is a free, open-source web app that emulates a classic mechanical split-flap (flip-board) airport terminal display — the kind you'd see at train stations and airports. It runs full-screen in any browser, turning a TV or large monitor into a beautiful retro display.
+FlipWeather wires up real live weather data to a classic mechanical split-flap (flip-board) display — the kind you'd see at train stations and airports. Click "Enable Location", and your local weather rotates across the board in four screens:
 
-No accounts. No subscriptions. No $199 fee. Just open `index.html` and go.
+1. **City + Condition** — where you are and what the sky looks like
+2. **Temperature** — current temp and feels-like in °F
+3. **Wind** — speed in MPH and compass direction
+4. **Humidity + UV** — relative humidity and UV index
 
-## Features
-
-- Realistic split-flap animation with colorful scramble transitions
-- Authentic mechanical clacking sound (recorded from a real split-flap display)
-- Auto-rotating inspirational quotes
-- Fullscreen TV mode (press `F`)
-- Keyboard controls for manual navigation
-- Works offline — zero external dependencies
-- Responsive from mobile to 4K displays
-- Pure vanilla HTML/CSS/JS — no frameworks, no build tools, no npm
+No API keys. No accounts. Powered by [Open-Meteo](https://open-meteo.com) (weather) and [Nominatim/OSM](https://nominatim.openstreetmap.org) (reverse geocoding) — both free and open.
 
 ## Quick Start
 
-1. Clone the repo
-2. Open `index.html` in a browser (or serve with any static file server)
-3. Click anywhere to enable audio
-4. Press `F` for fullscreen TV mode
+> **Must be served over HTTP** — ES modules don't work with `file://` URLs.
 
 ```bash
-# Or serve locally:
-python3 -m http.server 8080
-# Then open http://localhost:8080
+git clone https://github.com/magnum6actual/flipoff  # or your fork
+cd flipweather
+python3 -m http.server 9090
+# Open http://localhost:9090
 ```
+
+If you're using Claude Code, the dev server is pre-configured — just run the `FlipWeather Dev Server` launch task.
+
+## How to Use
+
+1. Open `http://localhost:9090` in a browser
+2. Click **Enable Location** to grant geolocation access
+3. The board fetches your weather and starts rotating through the 4 screens
+4. Press `F` for fullscreen TV mode
+5. Click anywhere to enable the flip sound
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
-| `Enter` / `Space` | Next message |
-| `Arrow Left` | Previous message |
-| `Arrow Right` | Next message |
+| `Enter` / `Space` | Next screen |
+| `Arrow Left` | Previous screen |
+| `Arrow Right` | Next screen |
 | `F` | Toggle fullscreen |
 | `M` | Toggle mute |
 | `Escape` | Exit fullscreen |
 
-## How It Works
-
-Each tile on the board is an independent element that can animate through a scramble sequence (rapid random characters with colored backgrounds) before settling on the final character. Only tiles whose content changes between messages animate — just like a real mechanical board.
-
-The sound is a single recorded audio clip of a real split-flap transition, played once per message change to perfectly sync with the visual animation.
-
 ## File Structure
 
 ```
-flipoff/
-  index.html           — Single-page app
+flipweather/
+  index.html              — Single-page app
   css/
-    reset.css          — CSS reset
-    layout.css         — Page layout (header, hero, board)
-    board.css          — Board container and accent bars
-    tile.css           — Tile styling and 3D flip animation
-    responsive.css     — Media queries for all screen sizes
+    reset.css             — CSS reset
+    layout.css            — Page layout (header, hero, board)
+    board.css             — Board container and accent bars
+    tile.css              — Tile styling and 3D flip animation
+    responsive.css        — Media queries for all screen sizes
   js/
-    main.js            — Entry point and UI wiring
-    Board.js           — Grid manager and transition orchestration
-    Tile.js            — Individual tile animation logic
-    SoundEngine.js     — Audio playback with Web Audio API
-    MessageRotator.js  — Quote rotation timer
+    main.js               — Entry point and UI wiring
+    WeatherService.js     — Open-Meteo + Nominatim API calls
+    Board.js              — Grid manager and transition orchestration
+    Tile.js               — Individual tile animation logic
+    SoundEngine.js        — Audio playback with Web Audio API
+    MessageRotator.js     — Screen rotation timer
     KeyboardController.js — Keyboard shortcut handling
-    constants.js       — Configuration (grid size, colors, quotes)
-    flapAudio.js       — Embedded audio data (base64)
+    constants.js          — Configuration (grid size, colors, default messages)
+    flapAudio.js          — Embedded audio data (base64)
+  .claude/
+    launch.json           — Dev server config for Claude Code users
 ```
 
-## Customization
+## Credits
 
-Edit `js/constants.js` to change:
-- **Messages**: Add your own quotes or text
-- **Grid size**: Adjust `GRID_COLS` and `GRID_ROWS`
-- **Timing**: Tweak `SCRAMBLE_DURATION`, `STAGGER_DELAY`, etc.
-- **Colors**: Modify `SCRAMBLE_COLORS` and `ACCENT_COLORS`
+- Weather data: [Open-Meteo](https://open-meteo.com) — free, no API key required
+- Reverse geocoding: [Nominatim](https://nominatim.openstreetmap.org) by OpenStreetMap contributors
+- Split-flap display engine: forked from [magnum6actual/flipoff](https://github.com/magnum6actual/flipoff)
 
 ## License
 

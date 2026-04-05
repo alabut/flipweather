@@ -19,47 +19,26 @@ export const ACCENT_COLORS = [
   '#00AAFF', '#00FFCC'
 ];
 
-export const MESSAGES = [
+export const DEFAULT_MESSAGES = [
   [
     '',
-    'GOD IS IN',
-    'THE DETAILS .',
-    '- LUDWIG MIES',
+    'FLIP WEATHER',
+    'LIVE CONDITIONS',
+    'OLD-SCHOOL STYLE',
     ''
   ],
   [
     '',
-    'STAY HUNGRY',
-    'STAY FOOLISH',
-    '- STEVE JOBS',
+    'ENABLE LOCATION',
+    'TO SEE YOUR',
+    'LOCAL WEATHER',
     ''
   ],
   [
     '',
-    'GOOD DESIGN IS',
-    'GOOD BUSINESS',
-    '- THOMAS WATSON',
-    ''
-  ],
-  [
-    '',
-    'LESS IS MORE',
-    '',
-    '- MIES VAN DER ROHE',
-    ''
-  ],
-  [
-    '',
-    'MAKE IT SIMPLE',
-    'BUT SIGNIFICANT',
-    '- DON DRAPER',
-    ''
-  ],
-  [
-    '',
-    'HAVE NO FEAR OF',
-    'PERFECTION',
-    '- SALVADOR DALI',
+    'TEMPERATURE',
+    'WIND + HUMIDITY',
+    'UV INDEX + MORE',
     ''
   ]
 ];

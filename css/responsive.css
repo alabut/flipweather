@@ -99,18 +99,6 @@
     font-size: 13px;
   }
 
-  .hero-cta {
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    padding: 0 16px;
-  }
-
-  .hero-cta input {
-    width: 100%;
-    border-radius: 8px;
-  }
-
   .hero-cta button {
     width: 100%;
   }

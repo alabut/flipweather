@@ -2,6 +2,8 @@ import { Board } from './Board.js';
 import { SoundEngine } from './SoundEngine.js';
 import { MessageRotator } from './MessageRotator.js';
 import { KeyboardController } from './KeyboardController.js';
+import { fetchWeather, fetchLocationName, formatMessages } from './WeatherService.js';
+import { TOTAL_TRANSITION } from './constants.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const boardContainer = document.getElementById('board-container');
@@ -23,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', initAudio);
   document.addEventListener('keydown', initAudio);
 
-  // Start message rotation
+  // Start default message rotation (weather teasers)
   rotator.start();
 
   // Volume toggle button in header
@@ -36,16 +38,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // "Get Early Access" button: scroll to board and go fullscreen
-  const ctaBtn = document.getElementById('cta-btn');
-  if (ctaBtn) {
-    ctaBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+  // "Enable Location" button: request geolocation on explicit click only
+  const locationBtn = document.getElementById('location-btn');
+  const locationStatus = document.getElementById('location-status');
+
+  if (locationBtn) {
+    locationBtn.addEventListener('click', async () => {
       initAudio();
-      boardContainer.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }, 400);
+      locationBtn.disabled = true;
+      locationStatus.textContent = '';
+
+      if (!navigator.geolocation) {
+        locationStatus.textContent = 'Geolocation is not supported by your browser.';
+        locationBtn.disabled = false;
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Show a loading state on the board immediately
+          rotator.stop();
+          board.displayMessage(['', 'FETCHING', 'WEATHER DATA', 'PLEASE WAIT', '']);
+
+          try {
+            // Wait for both fetches AND the board animation to finish
+            const [weatherData, locationName] = await Promise.all([
+              fetchWeather(latitude, longitude),
+              fetchLocationName(latitude, longitude),
+              new Promise(resolve => setTimeout(resolve, TOTAL_TRANSITION + 500))
+            ]);
+
+            const weatherMessages = formatMessages(weatherData, locationName);
+            rotator.setMessages(weatherMessages);
+
+            locationBtn.textContent = 'Weather Active';
+            locationBtn.classList.add('location-active');
+          } catch (err) {
+            locationStatus.textContent = 'Could not load weather data. Check your connection.';
+            locationBtn.disabled = false;
+            rotator.setMessages(rotator.messages); // restart with current messages
+          }
+        },
+        (err) => {
+          if (err.code === err.PERMISSION_DENIED) {
+            locationStatus.textContent = 'Location access denied. Enable it in your browser settings.';
+          } else if (err.code === err.TIMEOUT) {
+            locationStatus.textContent = 'Location request timed out. Please try again.';
+          } else {
+            locationStatus.textContent = 'Could not get your location. Please try again.';
+          }
+          locationBtn.disabled = false;
+        },
+        { timeout: 10000 }
+      );
     });
   }
 });
