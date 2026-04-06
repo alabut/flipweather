@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     locationBtn.addEventListener('click', async () => {
       initAudio();
       locationBtn.disabled = true;
-      locationStatus.textContent = '';
+      locationBtn.textContent = 'Detecting location...';
 
       if (!navigator.geolocation) {
         locationStatus.textContent = 'Geolocation is not supported by your browser.';
