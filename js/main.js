@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rotator.setMessages(weatherMessages);
 
             locationBtn.textContent = 'Weather Active';
+            locationStatus.textContent = '';
             locationBtn.classList.add('location-active');
           } catch (err) {
             locationStatus.textContent = 'Could not load weather data. Check your connection.';
@@ -89,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             locationStatus.textContent = 'Could not get your location. Please try again.';
           }
+          locationBtn.textContent = 'Try Again';
           locationBtn.disabled = false;
         },
         { timeout: 10000 }
