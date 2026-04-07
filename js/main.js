@@ -77,8 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
             locationStatus.textContent = '';
             locationBtn.classList.add('location-active');
           } catch (err) {
-            locationStatus.textContent = 'Could not load weather data. Check your connection.';
+            locationStatus.textContent = 'Weather services unavailable. Please try again later.';
             locationBtn.disabled = false;
+            locationBtn.textContent = 'Try Again';
             rotator.setMessages(rotator.messages); // restart with current messages
           }
         },
