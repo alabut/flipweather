@@ -1,6 +1,10 @@
 export const GRID_COLS = 22;
 export const GRID_ROWS = 5;
 
+// Portrait grid for mobile phones in vertical orientation
+export const GRID_COLS_PORTRAIT = 9;
+export const GRID_ROWS_PORTRAIT = 12;
+
 export const SCRAMBLE_DURATION = 800;
 export const FLIP_DURATION = 300;
 export const STAGGER_DELAY = 25;
@@ -17,6 +21,13 @@ export const SCRAMBLE_COLORS = [
 export const ACCENT_COLORS = [
   '#00FF7F', '#FF4D00', '#AA00FF',
   '#00AAFF', '#00FFCC'
+];
+
+// Portrait default messages — 9 cols × 12 rows, max 9 chars per line
+export const DEFAULT_MESSAGES_PORTRAIT = [
+  ['', '', 'FLIP', 'WEATHER', '', '', 'LIVE', 'UPDATES', '', '', '', ''],
+  ['', '', 'ENABLE', 'LOCATION', '', '', 'TO SEE', 'YOUR', 'WEATHER', '', '', ''],
+  ['', '', 'TEMP', 'WIND', 'HUMIDITY', '', 'UV INDEX', '', '', '', '', '']
 ];
 
 export const DEFAULT_MESSAGES = [

@@ -2,15 +2,23 @@ import { Board } from './Board.js';
 import { SoundEngine } from './SoundEngine.js';
 import { MessageRotator } from './MessageRotator.js';
 import { KeyboardController } from './KeyboardController.js';
-import { fetchWeather, fetchLocationName, formatMessages } from './WeatherService.js';
-import { TOTAL_TRANSITION } from './constants.js';
+import { fetchWeather, fetchLocationName, formatMessages, formatMessagesPortrait } from './WeatherService.js';
+import {
+  TOTAL_TRANSITION,
+  GRID_COLS_PORTRAIT, GRID_ROWS_PORTRAIT,
+  DEFAULT_MESSAGES, DEFAULT_MESSAGES_PORTRAIT
+} from './constants.js';
+
+// Matches phones in portrait — tablets and landscape are handled by the landscape board
+const PORTRAIT_QUERY = window.matchMedia('(max-width: 600px) and (orientation: portrait)');
+
+// Persists across orientation changes so we can reformat for the new grid
+let currentWeather = null;
+let currentLocationName = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const boardContainer = document.getElementById('board-container');
   const soundEngine = new SoundEngine();
-  const board = new Board(boardContainer, soundEngine);
-  const rotator = new MessageRotator(board);
-  const keyboard = new KeyboardController(rotator, soundEngine);
 
   // Initialize audio on first user interaction (browser autoplay policy)
   let audioInitialized = false;
@@ -25,8 +33,52 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', initAudio);
   document.addEventListener('keydown', initAudio);
 
-  // Start default message rotation (weather teasers)
-  rotator.start();
+  // Build the board sized for current orientation
+  function buildBoard() {
+    boardContainer.innerHTML = '';
+    const portrait = PORTRAIT_QUERY.matches;
+    const board = portrait
+      ? new Board(boardContainer, soundEngine, GRID_COLS_PORTRAIT, GRID_ROWS_PORTRAIT)
+      : new Board(boardContainer, soundEngine);
+
+    // Set tile size via inline style so it always beats responsive.css
+    if (portrait) {
+      board.boardEl.style.setProperty('--tile-size', 'clamp(28px, 8.5vw, 36px)');
+      board.boardEl.style.setProperty('--tile-gap', '3px');
+    }
+    return board;
+  }
+
+  function defaultMessages() {
+    return PORTRAIT_QUERY.matches ? DEFAULT_MESSAGES_PORTRAIT : DEFAULT_MESSAGES;
+  }
+
+  function weatherMessages() {
+    if (!currentWeather) return null;
+    return PORTRAIT_QUERY.matches
+      ? formatMessagesPortrait(currentWeather, currentLocationName)
+      : formatMessages(currentWeather, currentLocationName);
+  }
+
+  function loadingMessage() {
+    return PORTRAIT_QUERY.matches
+      ? ['', '', '', 'FETCHING', 'WEATHER', 'DATA', '', 'PLEASE', 'WAIT', '', '', '']
+      : ['', 'FETCHING', 'WEATHER DATA', 'PLEASE WAIT', ''];
+  }
+
+  // Initial board + rotator — use orientation-appropriate default messages from the start
+  let board = buildBoard();
+  const rotator = new MessageRotator(board);
+  const keyboard = new KeyboardController(rotator, soundEngine);
+  rotator.setMessages(defaultMessages());
+
+  // Rebuild board when phone is rotated
+  PORTRAIT_QUERY.addEventListener('change', () => {
+    rotator.stop();
+    board = buildBoard();
+    rotator.board = board;
+    rotator.setMessages(weatherMessages() || defaultMessages());
+  });
 
   // Volume toggle button in header
   const volumeBtn = document.getElementById('volume-btn');
@@ -60,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Show a loading state on the board immediately
           rotator.stop();
-          board.displayMessage(['', 'FETCHING', 'WEATHER DATA', 'PLEASE WAIT', '']);
+          board.displayMessage(loadingMessage());
 
           try {
             // Wait for both fetches AND the board animation to finish
@@ -70,8 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
               new Promise(resolve => setTimeout(resolve, TOTAL_TRANSITION + 500))
             ]);
 
-            const weatherMessages = formatMessages(weatherData, locationName);
-            rotator.setMessages(weatherMessages);
+            // Store for re-use when orientation changes
+            currentWeather = weatherData;
+            currentLocationName = locationName;
+
+            rotator.setMessages(weatherMessages());
 
             locationBtn.textContent = 'Weather Active';
             locationStatus.textContent = '';
@@ -80,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             locationStatus.textContent = 'Weather services unavailable. Please try again later.';
             locationBtn.disabled = false;
             locationBtn.textContent = 'Try Again';
-            rotator.setMessages(rotator.messages); // restart with current messages
+            rotator.setMessages(defaultMessages());
           }
         },
         (err) => {

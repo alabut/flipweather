@@ -5,9 +5,9 @@ import {
 } from './constants.js';
 
 export class Board {
-  constructor(containerEl, soundEngine) {
-    this.cols = GRID_COLS;
-    this.rows = GRID_ROWS;
+  constructor(containerEl, soundEngine, cols = GRID_COLS, rows = GRID_ROWS) {
+    this.cols = cols;
+    this.rows = rows;
     this.soundEngine = soundEngine;
     this.isTransitioning = false;
     this.tiles = [];

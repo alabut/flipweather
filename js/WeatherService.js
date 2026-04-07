@@ -108,6 +108,38 @@ export async function fetchLocationName(lat, lon) {
   return (addr.city || addr.town || addr.village || addr.county || 'UNKNOWN').toUpperCase();
 }
 
+// Splits text to fit a narrow board — breaks at word boundaries when possible
+function wrapLine(text, maxWidth) {
+  if (text.length <= maxWidth) return [text, ''];
+  const spaceIdx = text.lastIndexOf(' ', maxWidth);
+  if (spaceIdx > 0) {
+    return [text.slice(0, spaceIdx), text.slice(spaceIdx + 1, spaceIdx + 1 + maxWidth)];
+  }
+  return [text.slice(0, maxWidth), text.slice(maxWidth, maxWidth * 2)];
+}
+
+export function formatMessagesPortrait(weather, locationName) {
+  const { condition, temp, feelsLike, windSpeed, windDir, humidity, uvIndex } = weather;
+
+  const city = locationName.slice(0, 16);
+  const [cityLine1, cityLine2] = wrapLine(city, 9);
+  const [condLine1, condLine2] = wrapLine(condition, 9);
+
+  return [
+    // Screen 1: Location + condition — 12 rows
+    ['', '', cityLine1, cityLine2, '', '', condLine1, condLine2, '', '', '', ''],
+
+    // Screen 2: Temperature — 12 rows
+    ['', '', 'TEMP', `${temp}\u00b0F`, '', 'FEELS', 'LIKE', `${feelsLike}\u00b0F`, '', '', '', ''],
+
+    // Screen 3: Wind — 12 rows
+    ['', '', 'WIND', 'SPEED', `${windSpeed} MPH`, '', 'FROM', windDir, '', '', '', ''],
+
+    // Screen 4: Humidity + UV — 12 rows
+    ['', '', 'HUMIDITY', `${humidity}%`, '', '', 'UV INDEX', `${uvIndex}`, '', '', '', '']
+  ];
+}
+
 export function formatMessages(weather, locationName) {
   const { condition, temp, feelsLike, windSpeed, windDir, humidity, uvIndex } = weather;
 
