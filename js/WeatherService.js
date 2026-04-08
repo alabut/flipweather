@@ -58,6 +58,7 @@ async function fetchOpenMeteo(lat, lon) {
   const data = await res.json();
   const c = data.current;
   return {
+    source:    'open-meteo',
     condition: WMO_CONDITIONS[c.weathercode] ?? 'CONDITIONS UNKNOWN',
     temp:      Math.round(c.temperature_2m),
     feelsLike: Math.round(c.apparent_temperature),
@@ -75,6 +76,7 @@ async function fetchWttr(lat, lon) {
   const data = await res.json();
   const c = data.current_condition[0];
   return {
+    source:    'wttr',
     condition: c.weatherDesc[0].value.toUpperCase(),
     temp:      parseInt(c.temp_F, 10),
     feelsLike: parseInt(c.FeelsLikeF, 10),

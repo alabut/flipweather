@@ -27,6 +27,48 @@
   letter-spacing: -0.3px;
 }
 
+/* Status bar — footer of page-frame */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 36px 20px;
+  flex-shrink: 0;
+  border-top: 1px solid #E8E8E8;
+}
+
+.status-services {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.status-service {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ccc;
+  flex-shrink: 0;
+}
+
+.status-service.up   .status-dot { background: #00875A; }
+.status-service.up              { color: #888; }
+.status-service.down .status-dot { background: #CC2200; }
+.status-service.down            { color: #888; }
+
+.status-updated {
+  font-size: 11px;
+  color: #bbb;
+}
+
 .header-nav {
   display: flex;
   align-items: center;

@@ -60,6 +60,71 @@ document.addEventListener('DOMContentLoaded', () => {
       : formatMessages(currentWeather, currentLocationName);
   }
 
+  // Status bar — tracks health of each API service + last updated time
+  let statusTickRef = null;
+
+  function formatTimestamp(timestamp) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Los_Angeles',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).format(new Date(timestamp));
+  }
+
+  function setServiceState(id, state) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('up', 'down');
+    if (state) el.classList.add(state);
+  }
+
+  // Ping all three services on load — no location needed, uses a fixed coordinate
+  async function pingServices() {
+    const lat = 40.71, lon = -74.01; // NYC — just checking reachability
+    const checks = [
+      {
+        id: 'status-openmeteo',
+        url: `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m`,
+        timeout: 6000
+      },
+      {
+        id: 'status-wttr',
+        url: `https://wttr.in/~${lat},${lon}?format=j1`,
+        timeout: 8000
+      },
+      {
+        id: 'status-nominatim',
+        url: `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+        timeout: 6000
+      }
+    ];
+
+    checks.forEach(async ({ id, url, timeout }) => {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeout);
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        setServiceState(id, res.ok ? 'up' : 'down');
+      } catch {
+        setServiceState(id, 'down');
+      }
+    });
+  }
+
+  // After real weather loads: update open-meteo dot based on actual result,
+  // leave wttr.in and nominatim as the health check left them
+  function updateStatus(source, timestamp) {
+    setServiceState('status-openmeteo', source === 'open-meteo' ? 'up' : 'down');
+
+    const updatedEl = document.getElementById('status-updated');
+    if (!updatedEl) return;
+    updatedEl.textContent = `Updated ${formatTimestamp(timestamp)}`;
+  }
+
   function loadingMessage() {
     return PORTRAIT_QUERY.matches
       ? ['', '', '', 'FETCHING', 'WEATHER', 'DATA', '', 'PLEASE', 'WAIT', '', '', '']
@@ -71,6 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const rotator = new MessageRotator(board);
   const keyboard = new KeyboardController(rotator, soundEngine);
   rotator.setMessages(defaultMessages());
+
+  // Health check all three services immediately — no location needed
+  pingServices();
 
   // Rebuild board when phone is rotated
   PORTRAIT_QUERY.addEventListener('change', () => {
@@ -125,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Store for re-use when orientation changes
             currentWeather = weatherData;
             currentLocationName = locationName;
+            updateStatus(weatherData.source, Date.now());
 
             rotator.setMessages(weatherMessages());
 
