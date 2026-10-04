@@ -20,7 +20,7 @@ No API keys. No accounts. Powered by [Open-Meteo](https://open-meteo.com) (weath
 > **Must be served over HTTP** — ES modules don't work with `file://` URLs.
 
 ```bash
-git clone https://github.com/magnum6actual/flipoff  # or your fork
+git clone https://github.com/alabut/flipweather.git
 cd flipweather
 python3 -m http.server 9090
 # Open http://localhost:9090
